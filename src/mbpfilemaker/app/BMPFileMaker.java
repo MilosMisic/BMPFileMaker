@@ -14,6 +14,12 @@ public class BMPFileMaker extends javax.swing.JFrame {
 	private File bmpFile;
 	private byte[] result;
 
+	int width;
+	int height;
+	int vertRes;
+	int horisRes;
+	int pixelDataSize;
+
 	public BMPFileMaker() {
 		initComponents();
 		this.setLocationRelativeTo(null);
@@ -67,7 +73,7 @@ public class BMPFileMaker extends javax.swing.JFrame {
             }
         });
 
-        outFileButton.setText("Out File");
+        outFileButton.setText("Text File");
         outFileButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 outFileButtonActionPerformed(evt);
@@ -164,11 +170,11 @@ public class BMPFileMaker extends javax.swing.JFrame {
 				try {
 					byte[] data = Files.readAllBytes(path);
 
-					int width = read4Bytes(data, 18);
-					int height = read4Bytes(data, 22);
-					int vertRes = read4Bytes(data, 38);
-					int horisRes = read4Bytes(data, 42);
-					int pixelDataSize = read4Bytes(data, 34);
+					width = read4Bytes(data, 18);
+					height = read4Bytes(data, 22);
+					vertRes = read4Bytes(data, 38);
+					horisRes = read4Bytes(data, 42);
+					pixelDataSize = read4Bytes(data, 34);
 
 					int bpp = read2Bytes(data, 28);
 					int start = read4Bytes(data, 10);
@@ -178,7 +184,6 @@ public class BMPFileMaker extends javax.swing.JFrame {
 
 					int length = 0;
 					for (int i = start; i < data.length; i++) {
-						builder.append("0x").append(String.format("%02X ", data[i]));
 						result[length++] = data[i];
 					}
 
@@ -203,44 +208,47 @@ public class BMPFileMaker extends javax.swing.JFrame {
 		if (fileName.contains("."))
 			fileName = fileName.substring(0, fileName.indexOf("."));
 		String newOutDirectory = outDirectory;
-		newOutDirectory = newOutDirectory + File.separator + fileName + ".const";
+		newOutDirectory = newOutDirectory + File.separator + fileName + ".txt";
 
+		int length = 0;
+		for (int i = 0; i < result.length; i++) {
+			if (length == 16) {
+				builder.append("\r\n");
+				length = 0;
+			}
+			builder.append("0x").append(String.format("%02X", result[i])).append(", ");
+			length++;
+		}
+		builder = builder.deleteCharAt(builder.length() - 2);
+		System.out.println(builder.toString());
 		if (new File(newOutDirectory).exists())
 			switch (JOptionPane.showConfirmDialog(this, "File already exits    \n Do you want to overwrite it?")) {
 				case JOptionPane.YES_OPTION:
-					try {
-						FileOutputStream stream = new FileOutputStream(newOutDirectory);
-						stream.write(result);
-						stream.close();
-						if (new File(newOutDirectory).exists())
-							succesfulLabel.setText("Successful!");
-						newOutDirectory = null;
-					} catch (IOException e) {
-
-					}
+					writeToFile(newOutDirectory, builder.toString());
 					break;
-
 				case JOptionPane.NO_OPTION:
 					break;
 				case JOptionPane.CANCEL_OPTION:
 					break;
-
 			}
 		else {
-			try {
-				FileOutputStream stream = new FileOutputStream(newOutDirectory);
-				stream.write(result);
-				stream.close();
-				if (new File(newOutDirectory).exists())
-					succesfulLabel.setText("Successful!");
-				newOutDirectory = null;
-			} catch (IOException e) {
-
-			}
+			writeToFile(newOutDirectory, builder.toString());
 		}
 
     }//GEN-LAST:event_makeButtonActionPerformed
+	private void writeToFile(String dir, String text) {
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(dir));
+			out.write(text);
+			out.close();
 
+			if (new File(dir).exists())
+				succesfulLabel.setText("Successful!");
+			dir = null;
+		} catch (IOException e) {
+			System.out.println("Exception ");
+		}
+	}
     private void outFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outFileButtonActionPerformed
 		fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
