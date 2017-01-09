@@ -112,6 +112,9 @@
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="outFileNameLabel">
+      <Properties>
+        <Property name="editable" type="boolean" value="false"/>
+      </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="outFileButton">
       <Properties>
