@@ -8,37 +8,39 @@ import javax.swing.event.*;
 
 public class BMPFileMaker extends javax.swing.JFrame {
 
-	private StringBuilder builder;
-	private JFileChooser fileChooser;
-	private String outDirectory;
-	private File bmpFile;
-	private byte[] result;
+    private StringBuilder builder;
+    private JFileChooser fileChooser;
+    private String outDirectory;
+    private File bmpFile;
+    private byte[] result;
 
-	int width;
-	int height;
-	int vertRes;
-	int horisRes;
-	int pixelDataSize;
+    int width;
+    int height;
+    int vertRes;
+    int horisRes;
+    int pixelDataSize;
 
-	public BMPFileMaker() {
-		initComponents();
-		this.setLocationRelativeTo(null);
-		BMPNameLabel.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				BMPNameLabel.setToolTipText(bmpFile.getPath());
-			}
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				BMPNameLabel.setToolTipText(bmpFile.getPath());
-			}
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-			}
-		});
-	}
+    public BMPFileMaker() {
+        initComponents();
+        this.setLocationRelativeTo(null);
+        BMPNameLabel.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                BMPNameLabel.setToolTipText(bmpFile.getPath());
+            }
 
-	@SuppressWarnings("unchecked")
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                BMPNameLabel.setToolTipText(bmpFile.getPath());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -151,139 +153,144 @@ public class BMPFileMaker extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
-		fileChooser = new JFileChooser();
-		builder = new StringBuilder();
-		fileChooser.setDialogTitle("Select BMP File");
-		switch (fileChooser.showOpenDialog(this)) {
-			case JFileChooser.APPROVE_OPTION:
-				bmpFile = fileChooser.getSelectedFile();
-				String extension = ".bmp";
-				if (!bmpFile.getName().substring(bmpFile.getName().length() - 4).equalsIgnoreCase(extension)) {
-					JOptionPane.showMessageDialog(this, "File must be BMP type file!");
-					browseButtonActionPerformed(null);
-					bmpFile = null;
-				}
-				Path path = Paths.get("");
-				if (bmpFile != null)
-					path = Paths.get(bmpFile.getAbsolutePath());
+        fileChooser = new JFileChooser();
+        builder = new StringBuilder();
+        fileChooser.setDialogTitle("Select BMP File");
+        switch (fileChooser.showOpenDialog(this)) {
+            case JFileChooser.APPROVE_OPTION:
+                bmpFile = fileChooser.getSelectedFile();
+                String extension = ".bmp";
+                if (!bmpFile.getName().substring(bmpFile.getName().length() - 4).equalsIgnoreCase(extension)) {
+                    JOptionPane.showMessageDialog(this, "File must be BMP type file!");
+                    browseButtonActionPerformed(null);
+                    bmpFile = null;
+                }
+                Path path = Paths.get("");
+                if (bmpFile != null) {
+                    path = Paths.get(bmpFile.getAbsolutePath());
+                }
 
-				try {
-					byte[] data = Files.readAllBytes(path);
+                try {
+                    byte[] data = Files.readAllBytes(path);
 
-					width = read4Bytes(data, 18);
-					height = read4Bytes(data, 22);
-					vertRes = read4Bytes(data, 38);
-					horisRes = read4Bytes(data, 42);
-					pixelDataSize = read4Bytes(data, 34);
+                    width = read4Bytes(data, 18);
+                    height = read4Bytes(data, 22);
+                    vertRes = read4Bytes(data, 38);
+                    horisRes = read4Bytes(data, 42);
+                    pixelDataSize = read4Bytes(data, 34);
 
-					int bpp = read2Bytes(data, 28);
-					int start = read4Bytes(data, 10);
-					int fileSize = read4Bytes(data, 2);
+                    int bpp = read2Bytes(data, 28);
+                    int start = read4Bytes(data, 10);
+                    int fileSize = read4Bytes(data, 2);
 
-					result = new byte[data.length - data[10]];
+                    result = new byte[data.length - data[10]];
 
-					int length = 0;
-					for (int i = start; i < data.length; i++) {
-						result[length++] = data[i];
-					}
+                    int length = 0;
+                    for (int i = start; i < data.length; i++) {
+                        result[length++] = data[i];
+                    }
 
-					BMPNameLabel.setText(bmpFile.getAbsolutePath());
-					resLabel.setText(width + "x" + height);
-					bppLabel.setText(String.valueOf(bpp));
-					fileSizeLabel.setText(String.valueOf(fileSize) + " bytes");
-					succesfulLabel.setText("");
-					data = null;
-				} catch (IOException ex) {
-				}
+                    BMPNameLabel.setText(bmpFile.getAbsolutePath());
+                    resLabel.setText(width + "x" + height);
+                    bppLabel.setText(String.valueOf(bpp));
+                    fileSizeLabel.setText(String.valueOf(fileSize) + " bytes");
+                    succesfulLabel.setText("");
+                    data = null;
+                } catch (IOException ex) {
+                }
 
-				break;
-			case JFileChooser.CANCEL_OPTION:
-				bmpFile = null;
-		}
+                break;
+            case JFileChooser.CANCEL_OPTION:
+                bmpFile = null;
+        }
     }//GEN-LAST:event_browseButtonActionPerformed
 
     private void makeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_makeButtonActionPerformed
-		succesfulLabel.setText("");
-		String fileName = outFileNameLabel.getText();
-		if (fileName.contains("."))
-			fileName = fileName.substring(0, fileName.indexOf("."));
-		String newOutDirectory = outDirectory;
-		newOutDirectory = newOutDirectory + File.separator + fileName + ".txt";
+        succesfulLabel.setText("");
+        String fileName = outFileNameLabel.getText();
+        if (fileName.contains(".")) {
+            fileName = fileName.substring(0, fileName.indexOf("."));
+        }
+        String newOutDirectory = outDirectory;
+        newOutDirectory = newOutDirectory + File.separator + fileName + ".txt";
 
-		int length = 0;
-		for (int i = 0; i < result.length; i++) {
-			if (length == 16) {
-				builder.append("\r\n");
-				length = 0;
-			}
-			builder.append("0x").append(String.format("%02X", result[i])).append(", ");
-			length++;
-		}
-		builder = builder.deleteCharAt(builder.length() - 2);
-		System.out.println(builder.toString());
-		if (new File(newOutDirectory).exists())
-			switch (JOptionPane.showConfirmDialog(this, "File already exits    \n Do you want to overwrite it?")) {
-				case JOptionPane.YES_OPTION:
-					writeToFile(newOutDirectory, builder.toString());
-					break;
-				case JOptionPane.NO_OPTION:
-					break;
-				case JOptionPane.CANCEL_OPTION:
-					break;
-			}
-		else {
-			writeToFile(newOutDirectory, builder.toString());
-		}
+        int length = 0;
+        for (int i = 0; i < result.length; i++) {
+            if (length == 16) {
+                builder.append("\r\n");
+                length = 0;
+            }
+            builder.append("0x").append(String.format("%02X", result[i])).append(", ");
+            length++;
+        }
+        builder = builder.deleteCharAt(builder.length() - 2);
+        System.out.println(builder.toString());
+        if (new File(newOutDirectory).exists()) {
+            switch (JOptionPane.showConfirmDialog(this, "File already exits    \n Do you want to overwrite it?")) {
+                case JOptionPane.YES_OPTION:
+                    writeToFile(newOutDirectory, builder.toString());
+                    break;
+                case JOptionPane.NO_OPTION:
+                    break;
+                case JOptionPane.CANCEL_OPTION:
+                    break;
+            }
+        } else {
+            writeToFile(newOutDirectory, builder.toString());
+        }
 
     }//GEN-LAST:event_makeButtonActionPerformed
-	private void writeToFile(String dir, String text) {
-		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(dir));
-			out.write(text);
-			out.close();
-
-			if (new File(dir).exists())
-				succesfulLabel.setText("Successful!");
-			dir = null;
-		} catch (IOException e) {
-			System.out.println("Exception ");
-		}
-	}
+    private void writeToFile(String dir, String text) {
+        try {
+            BufferedWriter out = new BufferedWriter(new FileWriter(dir));
+            out.write(text);
+            out.close();
+            builder.delete(0, builder.length());
+            if (new File(dir).exists()) {
+                succesfulLabel.setText("Successful!");
+            }
+            dir = null;
+        } catch (IOException e) {
+            System.out.println("Exception ");
+        }
+    }
     private void outFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outFileButtonActionPerformed
-		fileChooser = new JFileChooser();
-		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		switch (fileChooser.showSaveDialog(this)) {
-			case JFileChooser.APPROVE_OPTION:
-				outDirectory = fileChooser.getSelectedFile().getPath();
-				outFileNameLabel.setToolTipText(outDirectory);
-				break;
-		}
+        fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        switch (fileChooser.showSaveDialog(this)) {
+            case JFileChooser.APPROVE_OPTION:
+                outDirectory = fileChooser.getSelectedFile().getPath();
+                outFileNameLabel.setToolTipText(outDirectory);
+                break;
+        }
     }//GEN-LAST:event_outFileButtonActionPerformed
-	public int read4Bytes(byte[] array, int firstIndex) {
-		byte[] data = new byte[]{array[firstIndex], array[firstIndex + 1], array[firstIndex + 2], array[firstIndex + 3]};
-		ByteBuffer byteBuffer = ByteBuffer.wrap(data);
-		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		return byteBuffer.getInt();
-	}
-	public int read2Bytes(byte[] array, int firstIndex) {
-		return (((int) array[firstIndex]) & 0xFF) + ((((int) array[firstIndex + 1])) << 8);
-	}
-	public static void main(String args[]) {
-		try {
-			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-				if ("Windows".equals(info.getName())) {
-					javax.swing.UIManager.setLookAndFeel(info.getClassName());
-					break;
-				}
-			}
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(BMPFileMaker.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		}
+    public int read4Bytes(byte[] array, int firstIndex) {
+        byte[] data = new byte[]{array[firstIndex], array[firstIndex + 1], array[firstIndex + 2], array[firstIndex + 3]};
+        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        return byteBuffer.getInt();
+    }
 
-		java.awt.EventQueue.invokeLater(() -> {
-			new BMPFileMaker().setVisible(true);
-		});
-	}
+    public int read2Bytes(byte[] array, int firstIndex) {
+        return (((int) array[firstIndex]) & 0xFF) + ((((int) array[firstIndex + 1])) << 8);
+    }
+
+    public static void main(String args[]) {
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Windows".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(BMPFileMaker.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+
+        java.awt.EventQueue.invokeLater(() -> {
+            new BMPFileMaker().setVisible(true);
+        });
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField BMPNameLabel;
