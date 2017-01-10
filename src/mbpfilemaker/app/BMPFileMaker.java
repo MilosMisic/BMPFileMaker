@@ -188,17 +188,14 @@ public class BMPFileMaker extends javax.swing.JFrame {
                     vertRes = read4Bytes(data, 38);
                     horisRes = read4Bytes(data, 42);
                     pixelDataSize = read4Bytes(data, 34);
-                    System.out.println("pixel data size " + pixelDataSize);
 
                     int bpp = read2Bytes(data, 28);
                     int start = read4Bytes(data, 10);
                     int fileSize = read4Bytes(data, 2);
+                    result = new byte[pixelDataSize];
 
-                    result = new byte[data.length - data[10]];
-
-                    int length = 0;
-                    for (int i = start; i < data.length; i++) {
-                        result[length++] = data[i];
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = data[start++];
                     }
 
                     BMPNameLabel.setText(bmpFile.getAbsolutePath());
@@ -219,20 +216,23 @@ public class BMPFileMaker extends javax.swing.JFrame {
 
     private void makeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_makeButtonActionPerformed
         succesfulLabel.setText("");
-        String newOutDirectory = outDirectory;
-        if (newOutDirectory.contains(".")) {
-            newOutDirectory = newOutDirectory.substring(0, newOutDirectory.lastIndexOf(".")) + ".txt";
-        }
+        String newOutDirectory = outDirectory + ".txt";
+//        if (newOutDirectory.substring(newOutDirectory.lastIndexOf(File.separator), newOutDirectory.length()).contains(".")) {
+//            newOutDirectory = newOutDirectory.substring(0, newOutDirectory.lastIndexOf(".")) + ".txt";
+//        }
 
         outFileNameLabel.setText(newOutDirectory);
-        int length = 0;
+        int cutOff = width;
+        int newRow = 0;
         for (int i = 0; i < result.length; i++) {
-            if (length == 16) {
+            if (newRow == cutOff) {
                 builder.append("\r\n");
-                length = 0;
+                newRow = 0;
+                i--;
+                continue;
             }
             builder.append("0x").append(String.format("%02X", result[i])).append(", ");
-            length++;
+            newRow++;
         }
         builder = builder.deleteCharAt(builder.length() - 2);
         if (new File(newOutDirectory).exists()) {
