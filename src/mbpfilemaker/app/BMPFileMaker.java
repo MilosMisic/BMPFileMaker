@@ -216,12 +216,16 @@ public class BMPFileMaker extends javax.swing.JFrame {
 
     private void makeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_makeButtonActionPerformed
         succesfulLabel.setText("");
-        String newOutDirectory = outDirectory + ".txt";
-//        if (newOutDirectory.substring(newOutDirectory.lastIndexOf(File.separator), newOutDirectory.length()).contains(".")) {
-//            newOutDirectory = newOutDirectory.substring(0, newOutDirectory.lastIndexOf(".")) + ".txt";
-//        }
+        String newOutDirectory = outDirectory;
+        if (!newOutDirectory.endsWith(".txt")) {
+            newOutDirectory = newOutDirectory + ".txt";
+        }
 
         outFileNameLabel.setText(newOutDirectory);
+
+        if (width % 4 != 0) {
+            width = width + (4 - width % 4);
+        }
         int cutOff = width;
         int newRow = 0;
         for (int i = 0; i < result.length; i++) {
@@ -281,6 +285,7 @@ public class BMPFileMaker extends javax.swing.JFrame {
                 break;
         }
     }//GEN-LAST:event_outFileButtonActionPerformed
+
     public int read4Bytes(byte[] array, int firstIndex) {
         byte[] data = new byte[]{array[firstIndex], array[firstIndex + 1], array[firstIndex + 2], array[firstIndex + 3]};
         ByteBuffer byteBuffer = ByteBuffer.wrap(data);
