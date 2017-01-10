@@ -191,6 +191,7 @@ public class BMPFileMaker extends javax.swing.JFrame {
 
                     int bpp = read2Bytes(data, 28);
                     int start = read4Bytes(data, 10);
+                    
                     int fileSize = read4Bytes(data, 2);
                     result = new byte[pixelDataSize];
 
