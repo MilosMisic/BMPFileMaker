@@ -191,7 +191,7 @@ public class BMPFileMaker extends javax.swing.JFrame {
 
                     int bpp = read2Bytes(data, 28);
                     int start = read4Bytes(data, 10);
-                    
+
                     int fileSize = read4Bytes(data, 2);
                     result = new byte[pixelDataSize];
 
@@ -217,17 +217,19 @@ public class BMPFileMaker extends javax.swing.JFrame {
 
     private void makeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_makeButtonActionPerformed
         succesfulLabel.setText("");
+
         String newOutDirectory = outDirectory;
         if (!newOutDirectory.endsWith(".txt")) {
             newOutDirectory = newOutDirectory + ".txt";
         }
 
         outFileNameLabel.setText(newOutDirectory);
-
+        width = 319;
         if (width % 4 != 0) {
             width = width + (4 - width % 4);
         }
         int cutOff = width;
+        System.out.println("Cutoff is " + cutOff);
         int newRow = 0;
         for (int i = 0; i < result.length; i++) {
             if (newRow == cutOff) {
