@@ -7,22 +7,22 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 public class BMPFileMaker extends javax.swing.JFrame {
-
+	
 	private StringBuilder builder;
 	private JFileChooser fileChooser;
 	private String outDirectory;
 	private File bmpFile;
 	private byte[] result;
-
+	
 	private String lastDirectoryBmp = "";
 	private String lastDirectoryTxt = "";
-
+	
 	int width;
 	int height;
 	int vertRes;
 	int horisRes;
 	int pixelDataSize;
-
+	
 	public BMPFileMaker() {
 		initComponents();
 		this.setLocationRelativeTo(null);
@@ -31,18 +31,18 @@ public class BMPFileMaker extends javax.swing.JFrame {
 			public void insertUpdate(DocumentEvent e) {
 				BMPNameLabel.setToolTipText(bmpFile.getPath());
 			}
-
+			
 			@Override
 			public void removeUpdate(DocumentEvent e) {
 				BMPNameLabel.setToolTipText(bmpFile.getPath());
 			}
-
+			
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 			}
 		});
 	}
-
+	
 	@SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -61,7 +61,7 @@ public class BMPFileMaker extends javax.swing.JFrame {
         succesfulLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("BMPFileMaker");
+        setTitle("Color Table Extractor");
         setResizable(false);
 
         browseButton.setText("BMP File");
@@ -179,26 +179,26 @@ public class BMPFileMaker extends javax.swing.JFrame {
 				if (bmpFile != null) {
 					path = Paths.get(bmpFile.getAbsolutePath());
 				}
-
+				
 				try {
 					byte[] data = Files.readAllBytes(path);
-
+					
 					width = read4Bytes(data, 18);
 					height = read4Bytes(data, 22);
 					vertRes = read4Bytes(data, 38);
 					horisRes = read4Bytes(data, 42);
 					pixelDataSize = read4Bytes(data, 34);
-
+					
 					int bpp = read2Bytes(data, 28);
 					int start = read4Bytes(data, 10);
-
+					
 					int fileSize = read4Bytes(data, 2);
 					result = new byte[pixelDataSize];
-
+					
 					for (int i = 0; i < result.length; i++) {
 						result[i] = data[start++];
 					}
-
+					
 					BMPNameLabel.setText(bmpFile.getAbsolutePath());
 					resLabel.setText(width + "x" + height);
 					bppLabel.setText(String.valueOf(bpp));
@@ -208,39 +208,43 @@ public class BMPFileMaker extends javax.swing.JFrame {
 					data = null;
 				} catch (IOException ex) {
 				}
-
+				
 				break;
 			case JFileChooser.CANCEL_OPTION:
 				bmpFile = null;
 		}
     }//GEN-LAST:event_browseButtonActionPerformed
-
+	
     private void makeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_makeButtonActionPerformed
 		succesfulLabel.setText("");
-
+		
 		String newOutDirectory = outDirectory;
 		if (!newOutDirectory.endsWith(".txt")) {
 			newOutDirectory = newOutDirectory + ".txt";
 		}
-
 		outFileNameLabel.setText(newOutDirectory);
-		if (width % 4 != 0) {
-			width = width + (4 - width % 4);
-		}
-		int cutOff = width;
-		System.out.println("Cutoff is " + cutOff);
+		int cutOff = 0;
+		int surplus = 0;
+		if (width % 4 != 0)
+			surplus = 4 - (width % 4);
+		
+		System.out.println(surplus);
+		cutOff = width;
+		
 		int newRow = 0;
 		for (int i = 0; i < result.length; i++) {
+			
 			if (newRow == cutOff) {
 				builder.append("\r\n");
 				newRow = 0;
 				i--;
+				i += surplus;
 				continue;
 			}
 			builder.append("0x").append(String.format("%02X", result[i])).append(", ");
 			newRow++;
 		}
-		builder = builder.deleteCharAt(builder.length() - 2);
+		builder = builder.deleteCharAt(builder.lastIndexOf(","));
 		if (new File(newOutDirectory).exists()) {
 			switch (JOptionPane.showConfirmDialog(this, "File already exits    \n Do you want to overwrite it?")) {
 				case JOptionPane.YES_OPTION:
@@ -254,7 +258,7 @@ public class BMPFileMaker extends javax.swing.JFrame {
 		} else {
 			writeToFile(newOutDirectory, builder.toString());
 		}
-
+		
     }//GEN-LAST:event_makeButtonActionPerformed
 	private void writeToFile(String dir, String text) {
 		try {
@@ -271,7 +275,7 @@ public class BMPFileMaker extends javax.swing.JFrame {
 		}
 	}
     private void outFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outFileButtonActionPerformed
-
+		
 		if (lastDirectoryBmp.isEmpty()) {
 			fileChooser = new JFileChooser();
 			fileChooser.setDialogTitle("Select output file location");
@@ -287,18 +291,18 @@ public class BMPFileMaker extends javax.swing.JFrame {
 				break;
 		}
     }//GEN-LAST:event_outFileButtonActionPerformed
-
+	
 	public int read4Bytes(byte[] array, int firstIndex) {
 		byte[] data = new byte[]{array[firstIndex], array[firstIndex + 1], array[firstIndex + 2], array[firstIndex + 3]};
 		ByteBuffer byteBuffer = ByteBuffer.wrap(data);
 		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 		return byteBuffer.getInt();
 	}
-
+	
 	public int read2Bytes(byte[] array, int firstIndex) {
 		return (((int) array[firstIndex]) & 0xFF) + ((((int) array[firstIndex + 1])) << 8);
 	}
-
+	
 	public static void main(String args[]) {
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -310,7 +314,7 @@ public class BMPFileMaker extends javax.swing.JFrame {
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(BMPFileMaker.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
-
+		
 		java.awt.EventQueue.invokeLater(() -> {
 			new BMPFileMaker().setVisible(true);
 		});
